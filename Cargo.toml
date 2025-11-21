@@ -397,6 +397,7 @@ storybook = { path = "crates/storybook" }
 streaming_diff = { path = "crates/streaming_diff" }
 sum_tree = { path = "crates/sum_tree" }
 supermaven = { path = "crates/supermaven" }
+cursor = { path = "crates/cursor" }
 supermaven_api = { path = "crates/supermaven_api" }
 codestral = { path = "crates/codestral" }
 system_specs = { path = "crates/system_specs" }

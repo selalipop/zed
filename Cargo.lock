@@ -4434,6 +4434,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "client",
+ "clock",
+ "collections",
+ "edit_prediction",
+ "editor",
+ "flate2",
+ "futures 0.3.31",
+ "gpui",
+ "http_client",
+ "language",
+ "log",
+ "project",
+ "prost 0.9.0",
+ "prost-build 0.9.0",
+ "serde",
+ "serde_json",
+ "settings",
+ "sha2",
+ "text",
+ "tokio",
+ "ui",
+ "unicode-segmentation",
+ "util",
+ "uuid",
+ "zed-reqwest",
+]
+
+[[package]]
 name = "cursor-icon"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5282,6 +5315,7 @@ dependencies = [
  "cloud_llm_client",
  "codestral",
  "copilot",
+ "cursor",
  "edit_prediction",
  "editor",
  "feature_flags",
@@ -5290,6 +5324,7 @@ dependencies = [
  "gpui",
  "indoc",
  "language",
+ "log",
  "lsp",
  "paths",
  "project",
@@ -21189,6 +21224,7 @@ dependencies = [
  "component",
  "copilot",
  "crashes",
+ "cursor",
  "dap",
  "dap_adapters",
  "db",

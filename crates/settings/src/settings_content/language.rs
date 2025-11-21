@@ -74,6 +74,7 @@ pub enum EditPredictionProvider {
     Supermaven,
     Zed,
     Codestral,
+    Cursor,
     Experimental(&'static str),
 }
 
@@ -92,6 +93,7 @@ impl<'de> Deserialize<'de> for EditPredictionProvider {
             Supermaven,
             Zed,
             Codestral,
+            Cursor,
             Experimental(String),
         }
 
@@ -101,6 +103,7 @@ impl<'de> Deserialize<'de> for EditPredictionProvider {
             Content::Supermaven => EditPredictionProvider::Supermaven,
             Content::Zed => EditPredictionProvider::Zed,
             Content::Codestral => EditPredictionProvider::Codestral,
+            Content::Cursor => EditPredictionProvider::Cursor,
             Content::Experimental(name) => {
                 if name == EXPERIMENTAL_SWEEP_EDIT_PREDICTION_PROVIDER_NAME {
                     EditPredictionProvider::Experimental(
@@ -125,6 +128,7 @@ impl EditPredictionProvider {
             | EditPredictionProvider::Copilot
             | EditPredictionProvider::Supermaven
             | EditPredictionProvider::Codestral
+            | EditPredictionProvider::Cursor
             | EditPredictionProvider::Experimental(_) => false,
         }
     }

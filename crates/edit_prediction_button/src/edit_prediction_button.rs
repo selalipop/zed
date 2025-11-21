@@ -3,6 +3,7 @@ use client::{Client, UserStore, zed_urls};
 use cloud_llm_client::UsageLimit;
 use codestral::CodestralCompletionProvider;
 use copilot::{Copilot, Status};
+use cursor::CursorClient;
 use editor::{
     Editor, MultiBufferOffset, SelectionEffects, actions::ShowEditPrediction, scroll::Autoscroll,
 };
@@ -233,6 +234,33 @@ impl Render for EditPredictionButton {
                             },
                         )
                         .with_handle(self.popover_menu_handle.clone()),
+                )
+            }
+
+            EditPredictionProvider::Cursor => {
+                let enabled = self.editor_enabled.unwrap_or(true);
+                let this = cx.weak_entity();
+
+                div().child(
+                    PopoverMenu::new("cursor")
+                        .menu(move |window, cx| {
+                            this.update(cx, |this, cx| {
+                                this.build_cursor_context_menu(window, cx)
+                            })
+                            .ok()
+                        })
+                        .anchor(Corner::BottomRight)
+                        .trigger_with_tooltip(
+                            IconButton::new("cursor-icon", IconName::AtSign)
+                                .shape(IconButtonShape::Square)
+                                .when(!enabled, |this| {
+                                    this.indicator(Indicator::dot().color(Color::Ignored))
+                                        .indicator_border_color(Some(
+                                            cx.theme().colors().status_bar_background,
+                                        ))
+                                }),
+                            |_, cx| Tooltip::for_action("Cursor", &ToggleMenu, cx),
+                        ),
                 )
             }
 
@@ -491,12 +519,19 @@ impl EditPredictionButton {
             providers.push(EditPredictionProvider::Codestral);
         }
 
+        let cursor_available = CursorClient::global(cx).is_some();
+        log::info!("Checking CursorClient availability: {}", cursor_available);
+        if cursor_available {
+            providers.push(EditPredictionProvider::Cursor);
+        }
+
         if cx.has_flag::<SweepFeatureFlag>() {
             providers.push(EditPredictionProvider::Experimental(
                 EXPERIMENTAL_SWEEP_EDIT_PREDICTION_PROVIDER_NAME,
             ));
         }
 
+        log::info!("Available providers: {:?}", providers);
         providers
     }
 
@@ -548,6 +583,11 @@ impl EditPredictionButton {
                     }
                     EditPredictionProvider::Codestral => {
                         menu.entry("Codestral", None, move |_, cx| {
+                            set_completion_provider(fs.clone(), cx, provider);
+                        })
+                    }
+                    EditPredictionProvider::Cursor => {
+                        menu.entry("Cursor", None, move |_, cx| {
                             set_completion_provider(fs.clone(), cx, provider);
                         })
                     }
@@ -685,6 +725,7 @@ impl EditPredictionButton {
                 | EditPredictionProvider::Copilot
                 | EditPredictionProvider::Supermaven
                 | EditPredictionProvider::Codestral
+                | EditPredictionProvider::Cursor
         ) {
             menu = menu
                 .separator()
@@ -938,6 +979,19 @@ impl EditPredictionButton {
                 .entry("Configure Codestral API Key", None, move |window, cx| {
                     window.dispatch_action(zed_actions::agent::OpenSettings.boxed_clone(), cx);
                 })
+        })
+    }
+
+    fn build_cursor_context_menu(
+        &self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Entity<ContextMenu> {
+        ContextMenu::build(window, cx, |menu, window, cx| {
+            let menu = self.build_language_settings_menu(menu, window, cx);
+            let menu =
+                self.add_provider_switching_section(menu, EditPredictionProvider::Cursor, cx);
+            menu
         })
     }
 

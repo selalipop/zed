@@ -2,6 +2,7 @@ use client::{Client, UserStore};
 use codestral::CodestralCompletionProvider;
 use collections::HashMap;
 use copilot::{Copilot, CopilotCompletionProvider};
+use cursor::{CursorClient, CursorCompletionProvider};
 use editor::Editor;
 use feature_flags::FeatureFlagAppExt;
 use gpui::{AnyWindowHandle, App, AppContext as _, Context, Entity, WeakEntity};
@@ -202,6 +203,16 @@ fn assign_edit_prediction_provider(
             let http_client = client.http_client();
             let provider = cx.new(|_| CodestralCompletionProvider::new(http_client));
             editor.set_edit_prediction_provider(Some(provider), window, cx);
+        }
+        EditPredictionProvider::Cursor => {
+            if let Some(cursor_client) = CursorClient::global(cx) {
+                if let Some(project) = editor.project() {
+                    let provider = cx.new(|_| {
+                        CursorCompletionProvider::new(cursor_client, project.clone())
+                    });
+                    editor.set_edit_prediction_provider(Some(provider), window, cx);
+                }
+            }
         }
         value @ (EditPredictionProvider::Experimental(_) | EditPredictionProvider::Zed) => {
             let zeta2 = zeta2::Zeta::global(client, &user_store, cx);
